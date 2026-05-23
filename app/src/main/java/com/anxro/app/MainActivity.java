@@ -20,6 +20,7 @@ import java.io.*;
 import java.net.URL;
 import java.util.zip.*;
 import org.json.JSONObject;
+import java.util.Calendar;
 import java.util.ArrayList;
 
 public class MainActivity extends Activity {
@@ -31,6 +32,15 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // DAY/NIGHT LOGO SWITCH - 6am to 6pm = day, else night
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        if (hour >= 6 && hour < 18) {
+            setTheme(R.style.DayTheme);
+        } else {
+            setTheme(R.style.NightTheme);
+        }
+        
         requestPermissions();
         sendNotification("Anxro", "App started");
         
