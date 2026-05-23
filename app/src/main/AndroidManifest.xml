@@ -6,10 +6,9 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     
     <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="Anxro"
-        android:theme="@style/Theme.Anxro">
+    android:allowBackup="true"
+    android:label="@string/app_name"
+    android:theme="@style/DayTheme">
         
         <activity
             android:name=".MainActivity"
