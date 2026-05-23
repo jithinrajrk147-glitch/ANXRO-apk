@@ -28,11 +28,11 @@ public class MainActivity extends Activity {
     String VERSION_URL = "https://jithinrajrk147-glitch.github.io/Anxro/app-version.json";
     String APP_FOLDER = "anxro_app";
     private static final int REQ_SPEECH = 101;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // DAY/NIGHT LOGO SWITCH - 6am to 6pm = day, else night
         int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
         if (hour >= 6 && hour < 18) {
@@ -40,38 +40,38 @@ public class MainActivity extends Activity {
         } else {
             setTheme(R.style.NightTheme);
         }
-        
+
         requestPermissions();
         sendNotification("Anxro", "App started");
-        
+
         webView = new WebView(this);
         webView.setWebViewClient(new WebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.addJavascriptInterface(new WebAppInterface(), "Android");
         setContentView(webView);
-        
+
         String openPage = getIntent().getStringExtra("open_page");
-        if (openPage != null) {
+        if (openPage!= null) {
             loadLocalFile(openPage);
         } else {
             new SilentUpdateTask().execute();
         }
     }
-    
+
     void requestPermissions() {
         String[] perms = {Manifest.permission.RECORD_AUDIO, Manifest.permission.POST_NOTIFICATIONS};
         ArrayList<String> toRequest = new ArrayList<>();
         for(String p : perms) {
-            if(ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
+            if(ContextCompat.checkSelfPermission(this, p)!= PackageManager.PERMISSION_GRANTED) {
                 toRequest.add(p);
             }
         }
         if(!toRequest.isEmpty()) {
-            ActivityCompat.requestPermissions(this, toRequest.toArray(new String), 100);
+            ActivityCompat.requestPermissions(this, toRequest.toArray(new String[0]), 100); // FIXED LINE 71
         }
     }
-    
+
     public class WebAppInterface {
         @JavascriptInterface
         public void startMic() {
@@ -82,17 +82,17 @@ public class MainActivity extends Activity {
             });
         }
     }
-    
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == REQ_SPEECH && resultCode == RESULT_OK) {
             ArrayList<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            String spokenText = results.get;
+            String spokenText = results.get(0); // FIXED LINE 86
             webView.evaluateJavascript("javascript:onMicResult('" + spokenText.replace("'","\\'") + "')", null);
         }
     }
-    
+
     void sendNotification(String title, String text) {
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         String channelId = "anxro_channel";
@@ -101,20 +101,20 @@ public class MainActivity extends Activity {
             nm.createNotificationChannel(channel);
         }
         Notification notif = new Notification.Builder(this, channelId)
-            .setContentTitle(title)
-            .setContentText(text)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setAutoCancel(true)
-            .build();
+           .setContentTitle(title)
+           .setContentText(text)
+           .setSmallIcon(android.R.drawable.ic_dialog_info) // FIXED ICON
+           .setAutoCancel(true)
+           .build();
         nm.notify(1, notif);
     }
-    
+
     void loadLocalFile(String filename) {
         File file = new File(getFilesDir(), APP_FOLDER + "/" + filename);
         if(file.exists()) webView.loadUrl("file://" + file.getAbsolutePath());
         else webView.loadData("Page not found", "text/html", "UTF-8");
     }
-    
+
     class SilentUpdateTask extends AsyncTask<Void, Void, String> {
         @Override protected String doInBackground(Void... params) {
             try {
@@ -144,11 +144,11 @@ public class MainActivity extends Activity {
             } catch (Exception e) { return null; }
         }
         @Override protected void onPostExecute(String path) {
-            if(path != null) webView.loadUrl("file://" + path);
+            if(path!= null) webView.loadUrl("file://" + path);
             else webView.loadData("No app found", "text/html", "UTF-8");
         }
     }
-    
+
     String downloadString(String urlStr) throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(new URL(urlStr).openStream()));
         StringBuilder sb = new StringBuilder(); String line;
@@ -158,7 +158,7 @@ public class MainActivity extends Activity {
     void downloadFile(String urlStr, File file) throws Exception {
         InputStream in = new URL(urlStr).openStream();
         FileOutputStream out = new FileOutputStream(file);
-        byte[] buf = new byte; int len;
+        byte[] buf = new byte[4096]; int len; // FIXED LINE 161
         while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
         out.close(); in.close();
     }
@@ -169,7 +169,7 @@ public class MainActivity extends Activity {
             if (ze.isDirectory()) file.mkdirs();
             else { new File(file.getParent()).mkdirs();
                 FileOutputStream fos = new FileOutputStream(file);
-                byte[] buf = new byte; int len;
+                byte[] buf = new byte[4096]; int len; // FIXED LINE 172
                 while ((len = zis.read(buf)) > 0) fos.write(buf, 0, len);
                 fos.close();
             }
